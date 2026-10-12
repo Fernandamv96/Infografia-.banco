@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "titulo": "Ciberataque al Banco de Chile (2018)",
+    "subtitulo": "Caso de estudio · Fundamentos de Seguridad de la Información · INACAP",
+    "resumen": "El 24 de mayo de 2018 un malware destructivo inutilizó miles de computadores del Banco de Chile. Mientras el equipo atendía la emergencia, los atacantes hicieron transferencias SWIFT fraudulentas por cerca de USD 10 millones. El caso muestra cómo un ataque a la disponibilidad puede servir de cortina de humo para un robo."
+  },
+  "cifras": [
+    { "valor": "24 may 2018", "etiqueta": "Fecha de detección", "fuentes": ["tripwire", "theregister"] },
+    { "valor": "~9.000", "etiqueta": "Estaciones de trabajo afectadas o desconectadas", "fuentes": ["tripwire", "theregister"] },
+    { "valor": "4", "etiqueta": "Transferencias SWIFT fraudulentas", "fuentes": ["tripwire"] },
+    { "valor": "~USD 10 M", "etiqueta": "Monto sustraído (fondos del banco, no de clientes)", "fuentes": ["tripwire", "theregister"] }
+  ],
+  "fases": [
+    {
+      "id": "acceso",
+      "titulo": "Acceso inicial",
+      "estado": "hipotesis",
+      "texto": "No se ha publicado cómo entraron los atacantes. En ataques SWIFT similares el vector habitual es el phishing dirigido a empleados con documentos maliciosos."
+    },
+    {
+      "id": "persistencia",
+      "titulo": "Persistencia y movimiento lateral",
+      "estado": "hipotesis",
+      "texto": "Para llegar a los sistemas conectados a SWIFT los atacantes debieron moverse por la red interna y obtener credenciales con privilegios."
+    },
+    {
+      "id": "distraccion",
+      "titulo": "Cortina de humo: malware wiper",
+      "estado": "documentado",
+      "texto": "Se ejecutó una variante del wiper KillDisk (Flashpoint lo describe como un MBR Killer modificado) que dejó inutilizables miles de equipos. No era ransomware: su objetivo era destruir y distraer.",
+      "fuentes": ["securityaffairs", "theregister"]
+    },
+    {
+      "id": "robo",
+      "titulo": "Transferencias fraudulentas",
+      "estado": "documentado",
+      "texto": "Mientras el banco desconectaba equipos se enviaron cuatro transferencias SWIFT fraudulentas por cerca de USD 10 millones. El banco inició acciones legales en Hong Kong, adonde se dirigió parte de los fondos.",
+      "fuentes": ["tripwire", "theregister"]
+    },
+    {
+      "id": "atribucion",
+      "titulo": "Atribución",
+      "estado": "no-confirmado",
+      "texto": "Analistas vincularon herramientas y tácticas con el grupo Lazarus (Corea del Norte), pero no hay atribución oficial. SWIFT señaló que la atribución corresponde a las autoridades.",
+      "fuentes": ["cyberscoop", "theregister"]
+    }
+  ],
+  "estados": {
+    "documentado": "Documentado en fuentes públicas",
+    "hipotesis": "Hipótesis del análisis",
+    "no-confirmado": "Reportado, no confirmado"
+  },
+  "vulnerabilidades": [
+    {
+      "id": "humano",
+      "titulo": "Factor humano",
+      "etiqueta": "Ingeniería social",
+      "texto": "Si el acceso inicial fue por phishing, bastó con que una persona abriera un adjunto malicioso."
+    },
+    {
+      "id": "monitoreo",
+      "titulo": "Detección tardía",
+      "etiqueta": "Monitoreo",
+      "texto": "Las transferencias anómalas no se bloquearon a tiempo mientras la atención estaba en el incidente del wiper."
+    },
+    {
+      "id": "segmentacion",
+      "titulo": "Segmentación insuficiente",
+      "etiqueta": "Red plana",
+      "texto": "Llegar desde estaciones de trabajo hasta sistemas vinculados a SWIFT indica que no estaban suficientemente aislados."
+    },
+    {
+      "id": "credenciales",
+      "titulo": "Credenciales privilegiadas",
+      "etiqueta": "Gestión de accesos",
+      "texto": "Operar SWIFT requiere credenciales válidas, y los atacantes las consiguieron o las abusaron."
+    },
+    {
+      "id": "respuesta",
+      "titulo": "Respuesta a incidentes",
+      "etiqueta": "Procesos",
+      "texto": "El plan de respuesta se concentró en la disponibilidad y no contempló que el incidente visible podía ocultar otro."
+    }
+  ],
+  "cia": [
+    {
+      "id": "confidencialidad",
+      "titulo": "Confidencialidad",
+      "texto": "Los atacantes accedieron a credenciales y sistemas internos con privilegios. No se reportó exposición de datos de clientes.",
+      "puntos": ["Credenciales de operadores comprometidas", "Acceso no autorizado a sistemas internos"]
+    },
+    {
+      "id": "integridad",
+      "titulo": "Integridad",
+      "texto": "Se emitieron órdenes de pago que el banco no autorizó, y el wiper destruyó datos de los equipos.",
+      "puntos": ["Mensajes SWIFT fraudulentos", "Registros de arranque (MBR) sobrescritos"]
+    },
+    {
+      "id": "disponibilidad",
+      "titulo": "Disponibilidad",
+      "texto": "Miles de estaciones quedaron inutilizables o fueron desconectadas, lo que afectó la atención en sucursales.",
+      "puntos": ["~9.000 estaciones fuera de servicio", "Operación de sucursales afectada"]
+    }
+  ],
+  "medidas": [
+    { "id": "mfa", "titulo": "MFA y acceso privilegiado", "texto": "MFA con token físico y cuentas separadas para operar SWIFT; principio de mínimo privilegio.", "mitiga": ["credenciales"] },
+    { "id": "siem", "titulo": "Monitoreo de transacciones", "texto": "SIEM y reglas de anomalía: montos, destinos y horarios inusuales disparan alertas y bloqueos.", "mitiga": ["monitoreo"] },
+    { "id": "segmentar", "titulo": "Segmentación de red", "texto": "Aislar la zona SWIFT con firewalls dedicados y saltos controlados (Customer Security Programme de SWIFT).", "mitiga": ["segmentacion", "credenciales"] },
+    { "id": "concientizar", "titulo": "Concientización", "texto": "Entrenamiento y simulaciones de phishing periódicas, con foco en el personal con privilegios.", "mitiga": ["humano"] },
+    { "id": "doble-control", "titulo": "Doble control de pagos", "texto": "Aprobación de dos personas y límites para transferencias de alto monto, con conciliación fuera de banda.", "mitiga": ["monitoreo", "credenciales"] },
+    { "id": "playbook", "titulo": "Plan de respuesta", "texto": "Playbooks que, ante un incidente destructivo, congelen pagos salientes hasta descartar fraude.", "mitiga": ["respuesta", "monitoreo"] },
+    { "id": "edr", "titulo": "EDR y parches", "texto": "Detección en endpoints y parcheo oportuno para frenar la ejecución y propagación del malware.", "mitiga": ["humano", "segmentacion"] }
+  ],
+  "lecciones": [
+    "Un ataque a la disponibilidad puede ser la distracción de un ataque a la integridad.",
+    "Durante un incidente mayor, lo primero es congelar las operaciones críticas, como los pagos salientes.",
+    "Los sistemas de pago deben vivir en una zona de red aislada y con controles propios.",
+    "La seguridad combina personas, procesos y tecnología: ninguna capa basta por sí sola.",
+    "Hay que separar los hechos verificados de las suposiciones al analizar un incidente."
+  ],
+  "fuentes": {
+    "tripwire": { "titulo": "Banco de Chile Says Virus Infiltrated Its Computer Systems, Stole $10M (Tripwire, 2018)", "url": "https://www.tripwire.com/state-of-security/banco-de-chile-says-virus-infiltrated-its-computer-systems-stole-10m" },
+    "theregister": { "titulo": "Hackers target payment transfer system at Chile's biggest bank (The Register, 2018)", "url": "https://www.theregister.co.uk/2018/06/11/chile_bank_wiper_prelude_cyberheaist/" },
+    "securityaffairs": { "titulo": "Crooks used a KillDisk wiper in an attack against Banco de Chile as diversion for a SWIFT hack (Security Affairs, 2018)", "url": "https://securityaffairs.com/?p=73372" },
+    "cyberscoop": { "titulo": "North Korea linked to SWIFT hacks of Bancomext and Banco de Chile (CyberScoop, 2018)", "url": "https://cyberscoop.com/north-korea-swift-hacks-bancomext-bank-of-chile/" },
+    "welivesecurity": { "titulo": "Chile busca asesoramiento en ciberseguridad tras ciberataque al Banco de Chile (WeLiveSecurity, 2018)", "url": "https://www.welivesecurity.com/la-es/2018/06/13/chile-busca-asesoramiento-en-ciberseguridad-tras-ciberataque-al-banco-de-chile/" }
+  }
+}
